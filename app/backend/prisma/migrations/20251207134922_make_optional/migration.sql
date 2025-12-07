@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "Staff" ALTER COLUMN "staffId" DROP NOT NULL,
+ALTER COLUMN "department" DROP NOT NULL;
+
+-- AlterTable
+ALTER TABLE "Student" ALTER COLUMN "rollNo" DROP NOT NULL,
+ALTER COLUMN "department" DROP NOT NULL;
