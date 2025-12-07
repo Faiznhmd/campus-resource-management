@@ -35,12 +35,10 @@ export class AuthService {
       },
     });
 
-    // Generate token
-    const token = await this.jwtService.signAsync({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    });
+    // Correct JWT payload (sub = user.id)
+    const payload = { sub: user.id, email: user.email, role: user.role };
+
+    const token = this.jwtService.sign(payload);
 
     return {
       message: 'User registered successfully',
@@ -60,12 +58,10 @@ export class AuthService {
     const match = await bcrypt.compare(dto.password, user.password);
     if (!match) throw new BadRequestException('Invalid password');
 
-    // Generate token
-    const token = await this.jwtService.signAsync({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    });
+    // Correct JWT payload (sub = user.id)
+    const payload = { sub: user.id, email: user.email, role: user.role };
+
+    const token = this.jwtService.sign(payload);
 
     return {
       message: 'Login successful',

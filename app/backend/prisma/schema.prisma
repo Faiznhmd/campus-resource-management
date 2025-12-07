@@ -21,3 +21,11 @@ enum Role {
   STAFF
   ADMIN
 }
+
+model Resource {
+  id        Int      @id @default(autoincrement())
+  name      String
+  type      String
+  location  String
+  createdAt DateTime @default(now())
+}
