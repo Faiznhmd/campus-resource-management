@@ -1,9 +1,20 @@
-import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
+import {
+  Post,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Delete,
+  UseGuards,
+  Body,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ResourceService } from './resource.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/role.guard';
+import { AdminGuard } from '../auth/role.guard';
 import { Role } from '../auth/roles.decorator';
 import { CreateResourceDto } from 'src/user/dto/create-resource.dto';
+import { UpdateResourceDto } from 'src/user/dto/update-resource.dto';
 
 @Controller('resources')
 export class ResourceController {
@@ -11,7 +22,7 @@ export class ResourceController {
 
   // 🔥 Only ADMIN can create resources
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @Role('ADMIN')
   create(@Body() dto: CreateResourceDto) {
     return this.resourceService.createResource(dto);
@@ -22,5 +33,28 @@ export class ResourceController {
   @UseGuards(JwtAuthGuard)
   getAll() {
     return this.resourceService.getAllResources();
+  }
+
+  // GET SINGLE RESOURCE
+  @Get(':id')
+  async getSingle(@Param('id', ParseIntPipe) id: number) {
+    return this.resourceService.getResourceById(id);
+  }
+
+  // UPDATE RESOURCE (ADMIN ONLY)
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateResourceDto,
+  ) {
+    return this.resourceService.updateResource(id, dto);
+  }
+
+  // DELETE RESOURCE (ADMIN ONLY)
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  async delete(@Param('id', ParseIntPipe) id: number) {
+    return this.resourceService.deleteResource(id);
   }
 }
