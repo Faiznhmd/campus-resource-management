@@ -10,10 +10,9 @@ import { CreateBookingDto } from 'src/user/dto/create-booking.dto';
 export class BookingService {
   constructor(private prisma: PrismaService) {}
 
-  // ⭐ Convert "4pm" → real Date
+  // ⭐ Converts "4pm" → Date
   private convertFriendlyTimeToDate(timeString: string): Date {
     const today = new Date();
-
     const match = timeString.match(/^(\d{1,2})(am|pm)$/i);
 
     if (!match) {
@@ -39,7 +38,7 @@ export class BookingService {
     );
   }
 
-  // ⭐ Phase-1 + Phase-2 Combined Booking Logic
+  // ⭐ Create booking (supports both Phase 1 + Phase 2)
   async createBooking(userId: number, dto: CreateBookingDto) {
     const { resourceId, startTime, endTime } = dto;
 
@@ -57,12 +56,12 @@ export class BookingService {
 
     if (!resource) throw new NotFoundException('Resource not found');
 
-    // 2️⃣ Check availability
+    // 2️⃣ Check resource availability
     if (resource.status !== 'AVAILABLE') {
       throw new BadRequestException('Resource not available for booking');
     }
 
-    // 3️⃣ Duration check
+    // 3️⃣ Duration limit
     if (resource.maxDuration) {
       const diffHours = (end.getTime() - start.getTime()) / 3600000;
       if (diffHours > resource.maxDuration) {
@@ -72,7 +71,7 @@ export class BookingService {
       }
     }
 
-    // 4️⃣ Overlap check (only approved)
+    // 4️⃣ Check time slot overlap (only approved bookings block the slot)
     const overlapping = await this.prisma.booking.findFirst({
       where: {
         resourceId,
@@ -85,8 +84,9 @@ export class BookingService {
       throw new BadRequestException('Resource already booked for this time');
     }
 
-    // ⭐⭐⭐ MAIN LOGIC ⭐⭐⭐
-    // Phase-2: requiresApproval = true → Pending booking
+    // ⭐⭐ Main Logic ⭐⭐
+
+    // Phase 2 → requiresApproval = true → Booking goes to PENDING
     if (resource.requiresApproval) {
       const booking = await this.prisma.booking.create({
         data: {
@@ -104,7 +104,7 @@ export class BookingService {
       };
     }
 
-    // Phase-1: requiresApproval = false → Auto-approve
+    // Phase 1 → Auto-approve booking
     const [booking] = await this.prisma.$transaction([
       this.prisma.booking.create({
         data: {
@@ -125,15 +125,6 @@ export class BookingService {
       message: 'Booking successful!',
       booking,
     };
-  }
-
-  // ⭐ User's booking list
-  getMyBookings(userId: number) {
-    return this.prisma.booking.findMany({
-      where: { userId },
-      include: { resource: true },
-      orderBy: { startTime: 'desc' },
-    });
   }
 
   // ⭐ Admin: Get all PENDING bookings
@@ -177,7 +168,8 @@ export class BookingService {
       data: { status: 'REJECTED' },
     });
   }
-  // ⭐ Admin: Get ALL bookings (approved, pending, rejected, cancelled)
+
+  // ⭐ Admin: Get ALL bookings
   getAllBookings() {
     return this.prisma.booking.findMany({
       include: {
@@ -187,6 +179,15 @@ export class BookingService {
       orderBy: {
         createdAt: 'desc',
       },
+    });
+  }
+
+  // ⭐ User: My bookings
+  getMyBookings(userId: number) {
+    return this.prisma.booking.findMany({
+      where: { userId },
+      include: { resource: true },
+      orderBy: { startTime: 'desc' },
     });
   }
 }
