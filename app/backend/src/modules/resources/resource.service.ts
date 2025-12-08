@@ -130,4 +130,15 @@ export class ResourceService {
 
     return { message: 'Resource deleted successfully' };
   }
+
+  async getAllResources() {
+    return this.prisma.resource.findMany({
+      include: {
+        bookings: true, // optional: show bookings for each resource
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
 }

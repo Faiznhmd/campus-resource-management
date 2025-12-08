@@ -1,132 +1,3 @@
-// import {
-//   BadRequestException,
-//   Injectable,
-//   NotFoundException,
-// } from '@nestjs/common';
-// import { PrismaService } from 'src/prisma/prisma.service';
-// import { CreateBookingDto } from 'src/user/dto/create-booking.dto';
-
-// @Injectable()
-// export class BookingService {
-//   constructor(private prisma: PrismaService) {}
-
-//   // ⭐ Helper: Convert "4pm" → Date("today at 16:00")
-//   private convertFriendlyTimeToDate(timeString: string): Date {
-//     const today = new Date();
-
-//     // Accept formats like: 4pm, 10am, 12pm, 9AM
-//     const match = timeString.match(/^(\d{1,2})(am|pm)$/i);
-
-//     if (!match) {
-//       throw new BadRequestException(
-//         'Invalid time format. Use something like "4pm" or "10am".',
-//       );
-//     }
-
-//     let hour = parseInt(match[1], 10);
-//     const period = match[2].toLowerCase();
-
-//     // Convert into 24-hour format
-//     if (period === 'pm' && hour !== 12) hour += 12;
-//     if (period === 'am' && hour === 12) hour = 0;
-
-//     return new Date(
-//       today.getFullYear(),
-//       today.getMonth(),
-//       today.getDate(),
-//       hour,
-//       0,
-//       0,
-//       0,
-//     );
-//   }
-
-//   // ⭐ Main Booking Logic
-//   async createBooking(userId: number, dto: CreateBookingDto) {
-//     const { resourceId, startTime, endTime } = dto;
-
-//     // ⭐ Convert friendly times → real JS Dates
-//     const start = this.convertFriendlyTimeToDate(startTime);
-//     const end = this.convertFriendlyTimeToDate(endTime);
-
-//     if (start >= end) {
-//       throw new BadRequestException('startTime must be before endTime');
-//     }
-
-//     // 1️⃣ Find resource
-//     const resource = await this.prisma.resource.findUnique({
-//       where: { id: resourceId },
-//     });
-
-//     if (!resource) {
-//       throw new NotFoundException('Resource not found');
-//     }
-
-//     // 2️⃣ Check resource status
-//     if (resource.status !== 'AVAILABLE') {
-//       throw new BadRequestException('Resource is not available for booking');
-//     }
-
-//     // 3️⃣ Duration check
-//     if (resource.maxDuration) {
-//       const diffMs = end.getTime() - start.getTime();
-//       const diffHours = diffMs / (1000 * 60 * 60);
-
-//       if (diffHours > resource.maxDuration) {
-//         throw new BadRequestException(
-//           `Booking duration exceeds max allowed duration of ${resource.maxDuration} hours`,
-//         );
-//       }
-//     }
-
-//     // 4️⃣ Check overlapping approved bookings
-//     const overlappingBooking = await this.prisma.booking.findFirst({
-//       where: {
-//         resourceId,
-//         status: 'APPROVED',
-//         AND: [{ startTime: { lt: end } }, { endTime: { gt: start } }],
-//       },
-//     });
-
-//     if (overlappingBooking) {
-//       throw new BadRequestException(
-//         'Resource is already booked for the selected time range',
-//       );
-//     }
-
-//     // 5️⃣ Phase 1: Auto-approve booking
-//     const [booking] = await this.prisma.$transaction([
-//       this.prisma.booking.create({
-//         data: {
-//           userId,
-//           resourceId,
-//           startTime: start,
-//           endTime: end,
-//           status: 'APPROVED',
-//         },
-//       }),
-//       this.prisma.resource.update({
-//         where: { id: resourceId },
-//         data: { status: 'BOOKED' },
-//       }),
-//     ]);
-
-//     return {
-//       message: 'Booking successful',
-//       booking,
-//     };
-//   }
-
-//   // 👇 User's bookings list
-//   getMyBookings(userId: number) {
-//     return this.prisma.booking.findMany({
-//       where: { userId },
-//       include: { resource: true },
-//       orderBy: { startTime: 'desc' },
-//     });
-//   }
-// }
-
 import {
   BadRequestException,
   Injectable,
@@ -304,6 +175,18 @@ export class BookingService {
     return this.prisma.booking.update({
       where: { id },
       data: { status: 'REJECTED' },
+    });
+  }
+  // ⭐ Admin: Get ALL bookings (approved, pending, rejected, cancelled)
+  getAllBookings() {
+    return this.prisma.booking.findMany({
+      include: {
+        user: true,
+        resource: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 }

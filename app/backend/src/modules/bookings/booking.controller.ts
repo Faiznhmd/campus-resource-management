@@ -1,29 +1,3 @@
-// import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
-// import { BookingService } from './booking.service';
-// import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard'; // adjust path as per your project
-// import { CreateBookingDto } from 'src/user/dto/create-booking.dto';
-
-// @Controller('bookings')
-// @UseGuards(JwtAuthGuard) // ✅ only logged-in users can book
-// export class BookingController {
-//   constructor(private readonly bookingService: BookingService) {}
-
-//   // 1️⃣ Create booking (auto-approve phase)
-//   @Post()
-//   createBooking(@Body() dto: CreateBookingDto, @Req() req: any) {
-//     const userId = req.user.id ?? req.user.sub;
-//     // from JWT payload
-//     return this.bookingService.createBooking(userId, dto);
-//   }
-
-//   // 2️⃣ Get current user's bookings
-//   @Get('me')
-//   getMyBookings(@Req() req: any) {
-//     const userId = req.user.id;
-//     return this.bookingService.getMyBookings(userId);
-//   }
-// }
-
 import {
   Body,
   Controller,
@@ -75,5 +49,12 @@ export class BookingController {
   @Patch(':id/reject')
   reject(@Param('id') id: string) {
     return this.bookingService.rejectBooking(Number(id));
+  }
+
+  // ⭐ Admin: Get all bookings
+  @UseGuards(AdminGuard)
+  @Get()
+  getAllBookings() {
+    return this.bookingService.getAllBookings();
   }
 }

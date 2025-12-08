@@ -71,7 +71,19 @@ export class AuthService {
   }
 
   // ALL USERS
+  // async getAllUsers() {
+  //   return this.prisma.user.findMany();
+  // }
+
+  // ⭐ Admin: Get all users
   async getAllUsers() {
-    return this.prisma.user.findMany();
+    return this.prisma.user.findMany({
+      include: {
+        bookings: true, // show user's bookings
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   }
 }
