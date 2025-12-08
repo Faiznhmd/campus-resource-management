@@ -29,7 +29,7 @@ model Resource {
   type             String // EQUIPMENT / LAB / ROOM
   location         String?
   description      String?
-  status           Status  @default(AVAILABLE)
+  status           ResourceStatus  @default(AVAILABLE)
   maxDuration      Int? // in hours
   requiresApproval Boolean @default(false)
 
@@ -39,10 +39,12 @@ model Resource {
   createdAt DateTime @default(now())
 }
 
-enum Status {
+enum ResourceStatus {
   AVAILABLE
+  BOOKED
   MAINTENANCE
 }
+
 
 model Booking {
   id         Int           @id @default(autoincrement())
@@ -53,9 +55,9 @@ model Booking {
   status     BookingStatus @default(APPROVED)
 
   resource Resource @relation(fields: [resourceId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   // Relation to User
-  user User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
 }

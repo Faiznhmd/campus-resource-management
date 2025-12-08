@@ -14,7 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   validate(payload: any) {
     return {
-      id: payload.id, // correct JWT standard field
+      id: payload.sub, // 🔥 FIXED: JWT stores user id in `sub`
       email: payload.email,
       role: payload.role,
     };

@@ -7,7 +7,7 @@ import {
   IsInt,
   IsEnum,
 } from 'class-validator';
-import { Status } from '@prisma/client';
+import { ResourceStatus } from '@prisma/client';
 
 export class CreateResourceDto {
   @IsString()
@@ -25,8 +25,8 @@ export class CreateResourceDto {
   description?: string;
 
   @IsOptional()
-  @IsEnum(Status)
-  status?: Status;
+  @IsEnum(ResourceStatus)
+  status?: ResourceStatus;
 
   @IsOptional()
   @IsInt()
