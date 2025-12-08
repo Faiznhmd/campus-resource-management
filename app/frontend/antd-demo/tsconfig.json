@@ -20,8 +20,7 @@
     ],
     "paths": {
       "@/*": ["./*"]
-    },
-    "types": ["@types/node", "@types/axios"]
+    }
   },
   "include": [
     "next-env.d.ts",
