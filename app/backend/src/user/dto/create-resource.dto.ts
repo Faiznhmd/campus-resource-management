@@ -1,15 +1,38 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+// src/modules/resource/dto/create-resource.dto.ts
+
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsInt,
+  IsEnum,
+} from 'class-validator';
+import { Status } from '@prisma/client';
 
 export class CreateResourceDto {
   @IsString()
-  @IsNotEmpty()
   name: string;
 
   @IsString()
-  @IsNotEmpty()
   type: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  location: string;
+  location?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsEnum(Status)
+  status?: Status;
+
+  @IsOptional()
+  @IsInt()
+  maxDuration?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  requiresApproval?: boolean;
 }

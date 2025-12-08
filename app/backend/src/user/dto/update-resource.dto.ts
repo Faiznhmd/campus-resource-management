@@ -1,15 +1,6 @@
-import { IsOptional, IsString } from 'class-validator';
+// src/modules/resource/dto/update-resource.dto.ts
 
-export class UpdateResourceDto {
-  @IsOptional()
-  @IsString()
-  name?: string;
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateResourceDto } from './create-resource.dto';
 
-  @IsOptional()
-  @IsString()
-  type?: string;
-
-  @IsOptional()
-  @IsString()
-  location?: string;
-}
+export class UpdateResourceDto extends PartialType(CreateResourceDto) {}

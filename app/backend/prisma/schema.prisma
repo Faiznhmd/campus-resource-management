@@ -7,13 +7,14 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
-  email     String   @unique
+  email     String    @unique
   password  String
   role      Role
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  bookings  Booking[]
 }
 
 enum Role {
@@ -23,9 +24,45 @@ enum Role {
 }
 
 model Resource {
-  id        Int      @id @default(autoincrement())
-  name      String
-  type      String
-  location  String
+  id               Int     @id @default(autoincrement())
+  name             String
+  type             String // EQUIPMENT / LAB / ROOM
+  location         String?
+  description      String?
+  status           Status  @default(AVAILABLE)
+  maxDuration      Int? // in hours
+  requiresApproval Boolean @default(false)
+
+  // Relation with bookings
+  bookings Booking[]
+
   createdAt DateTime @default(now())
+}
+
+enum Status {
+  AVAILABLE
+  MAINTENANCE
+}
+
+model Booking {
+  id         Int           @id @default(autoincrement())
+  resourceId Int
+  userId     Int
+  startTime  DateTime
+  endTime    DateTime
+  status     BookingStatus @default(APPROVED)
+
+  resource Resource @relation(fields: [resourceId], references: [id])
+
+  // Relation to User
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+enum BookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
 }
