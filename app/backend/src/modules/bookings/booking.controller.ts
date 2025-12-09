@@ -14,47 +14,48 @@ import { CreateBookingDto } from 'src/user/dto/create-booking.dto';
 import { AdminGuard } from '../auth/role.guard';
 
 @Controller('bookings')
-@UseGuards(JwtAuthGuard)
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
-  // ⭐ User creates booking
+  // USER: Create Booking
+  @UseGuards(JwtAuthGuard)
   @Post()
   createBooking(@Body() dto: CreateBookingDto, @Req() req: any) {
-    const userId = req.user.id ?? req.user.sub; // supports jwt payload variants
+    const userId = req.user.id; // ✅ FIXED
     return this.bookingService.createBooking(userId, dto);
   }
 
-  // ⭐ User: Get my bookings
+  // USER: My Bookings
+  @UseGuards(JwtAuthGuard)
   @Get('me')
   getMyBookings(@Req() req: any) {
-    const userId = req.user.id ?? req.user.sub;
+    const userId = req.user.id; // ✅ FIXED
     return this.bookingService.getMyBookings(userId);
   }
 
-  // ⭐ Admin: Get pending booking requests
-  @UseGuards(AdminGuard)
+  // ADMIN: Pending bookings
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @Get('pending')
   getPending() {
     return this.bookingService.getPendingBookings();
   }
 
-  // ⭐ Admin: Approve booking
-  @UseGuards(AdminGuard)
+  // ADMIN: Approve
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @Patch(':id/approve')
   approve(@Param('id') id: string) {
     return this.bookingService.approveBooking(Number(id));
   }
 
-  // ⭐ Admin: Reject booking
-  @UseGuards(AdminGuard)
+  // ADMIN: Reject
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @Patch(':id/reject')
   reject(@Param('id') id: string) {
     return this.bookingService.rejectBooking(Number(id));
   }
 
-  // ⭐ Admin: Get ALL bookings
-  @UseGuards(AdminGuard)
+  // ADMIN: All bookings
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @Get()
   getAllBookings() {
     return this.bookingService.getAllBookings();

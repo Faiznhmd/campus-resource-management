@@ -1,22 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Table, Tag, Button } from 'antd';
+import { Card, Table, Tag, Button, Space } from 'antd';
 import api from '../../services/api';
 import { useRouter } from 'next/navigation';
+
+interface ResourceInfo {
+  id: number;
+  name: string;
+  description: string;
+}
 
 interface Booking {
   id: number;
   startTime: string;
   endTime: string;
-  status: 'pending' | 'approved' | 'rejected' | string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
   createdAt: string;
-  resource: {
-    id: number;
-    name: string;
-    description: string;
-  };
-  requiresApproval: boolean;
+  resource: ResourceInfo;
 }
 
 export default function UserBookingsPage() {
@@ -40,15 +41,16 @@ export default function UserBookingsPage() {
     fetchMyBookings();
   }, []);
 
+  // ===============================
+  // TABLE COLUMNS
+  // ===============================
   const columns = [
     {
       title: 'Resource',
       dataIndex: 'resource',
       key: 'resource',
       width: 180,
-      render: (resource: Booking['resource']) => (
-        <strong>{resource?.name}</strong>
-      ),
+      render: (resource: ResourceInfo) => <strong>{resource?.name}</strong>,
     },
     {
       title: 'Start Time',
@@ -71,13 +73,13 @@ export default function UserBookingsPage() {
       width: 120,
       render: (status: Booking['status']) => {
         const color =
-          status === 'approved'
+          status === 'APPROVED'
             ? 'green'
-            : status === 'pending'
+            : status === 'PENDING'
             ? 'orange'
             : 'red';
 
-        return <Tag color={color}>{status.toUpperCase()}</Tag>;
+        return <Tag color={color}>{status}</Tag>;
       },
     },
     {
@@ -107,60 +109,66 @@ export default function UserBookingsPage() {
     },
   ];
 
-  // ⭐ NEW USER (NO BOOKINGS)
-  if (!loading && bookings.length === 0) {
-    return (
-      <div
-        style={{
-          textAlign: 'center',
-          marginTop: 80,
-        }}
-      >
-        <h1 style={{ fontSize: '32px', marginBottom: 10 }}>👋 Welcome!</h1>
-
-        <p style={{ fontSize: '20px', marginBottom: 30 }}>
-          You don’t have any bookings yet.
-        </p>
-
-        <Button
-          type="primary"
-          size="large"
-          onClick={() => router.push('/dashboard/resources')}
-        >
-          Browse Resources
-        </Button>
-      </div>
-    );
-  }
-
-  // ⭐ USER HAS BOOKINGS → SHOW TABLE
+  // ===============================
+  // PAGE RENDER
+  // ===============================
   return (
-    <div style={{ margin: 20 }}>
-      <h2
-        style={{
-          marginBottom: 20,
-          fontSize: 24,
-          display: 'flex',
-          justifyContent: 'space-between',
-        }}
-      >
-        My Bookings
-        <Button
-          type="primary"
-          onClick={() => router.push('/dashboard/resources')}
+    <Card style={{ margin: 20 }}>
+      {/** ⭐ NEW USER (NO BOOKINGS) */}
+      {!loading && bookings.length === 0 ? (
+        <div
+          style={{
+            textAlign: 'center',
+            padding: '60px 20px',
+          }}
         >
-          All Resources
-        </Button>
-      </h2>
+          <h1 style={{ fontSize: '32px', marginBottom: '10px' }}>
+            👋 Welcome!
+          </h1>
+          <p style={{ fontSize: '20px', marginBottom: '25px' }}>
+            You don’t have any bookings yet.
+          </p>
 
-      <Table
-        rowKey="id"
-        dataSource={bookings}
-        columns={columns}
-        loading={loading}
-        pagination={{ pageSize: 5 }}
-        style={{ tableLayout: 'fixed' }}
-      />
-    </div>
+          <Button
+            type="primary"
+            size="large"
+            onClick={() => router.push('/dashboard/resources')}
+          >
+            Browse Resources
+          </Button>
+        </div>
+      ) : (
+        <>
+          {/** ⭐ HEADER */}
+          <Space
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: 15,
+            }}
+          >
+            <h2 style={{ margin: 0 }}>My Bookings</h2>
+
+            <Button
+              type="primary"
+              onClick={() => router.push('/dashboard/resources')}
+            >
+              All Resources
+            </Button>
+          </Space>
+
+          {/** ⭐ BOOKINGS TABLE */}
+          <Table
+            rowKey="id"
+            dataSource={bookings}
+            columns={columns}
+            loading={loading}
+            pagination={{ pageSize: 5 }}
+            style={{ tableLayout: 'fixed' }}
+          />
+        </>
+      )}
+    </Card>
   );
 }

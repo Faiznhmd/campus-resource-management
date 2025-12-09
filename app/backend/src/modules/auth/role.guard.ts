@@ -42,14 +42,11 @@ export class AdminGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const user = req.user;
 
-    if (!user) {
-      throw new ForbiddenException('User not authenticated');
-    }
+    if (!user) throw new ForbiddenException('Not authenticated');
 
     if (user.role !== 'ADMIN') {
-      throw new ForbiddenException('Only admins can perform this action');
+      throw new ForbiddenException('Access denied: Admins only');
     }
-
     return true;
   }
 }

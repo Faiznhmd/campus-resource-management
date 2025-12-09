@@ -52,7 +52,7 @@ model Booking {
   userId     Int
   startTime  DateTime
   endTime    DateTime
-  status     BookingStatus @default(APPROVED)
+  status     BookingStatus @default(PENDING)
 
   resource Resource @relation(fields: [resourceId], references: [id])
   user User @relation(fields: [userId], references: [id])
