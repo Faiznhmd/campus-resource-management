@@ -45,21 +45,23 @@ export class ResourceController {
   }
 
   // ---------------------- PUBLIC --------------------------
-
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {
     return this.resourceService.findAll();
   }
 
+  // ---------------------- ADMIN ONLY VIEW ------------------
+  // NOTE: must be placed BEFORE the ':id' route so "admin" is not treated as an id
+  @Get('admin')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  getAllResources() {
+    return this.resourceService.getAllResources();
+  }
+
+  // ---------------------- PUBLIC (single) -----------------
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.resourceService.findOne(id);
-  }
-
-  //admin view all resource
-  @UseGuards(AdminGuard)
-  @Get()
-  getAllResources() {
-    return this.resourceService.getAllResources();
   }
 }

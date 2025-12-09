@@ -30,6 +30,7 @@ export class UsersService {
       data,
     });
   }
+
   // ⭐ ADMIN Delete User
   async deleteUser(id: number) {
     // 1. Validate user exists
@@ -45,5 +46,37 @@ export class UsersService {
     return this.prisma.user.delete({
       where: { id },
     });
+  }
+
+  // ⭐ ADMIN Get All Users
+  async getAllUsers() {
+    return this.prisma.user.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  async getUserById(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 }

@@ -190,4 +190,20 @@ export class BookingService {
       orderBy: { startTime: 'desc' },
     });
   }
+
+  async getBookingById(id: number) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id },
+      include: {
+        user: true,
+        resource: true,
+      },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    return booking;
+  }
 }

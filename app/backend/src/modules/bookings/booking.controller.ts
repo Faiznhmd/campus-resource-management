@@ -60,4 +60,10 @@ export class BookingController {
   getAllBookings() {
     return this.bookingService.getAllBookings();
   }
+
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Get(':id')
+  getBookingById(@Param('id') id: string) {
+    return this.bookingService.getBookingById(Number(id));
+  }
 }
