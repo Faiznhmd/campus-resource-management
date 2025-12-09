@@ -1,5 +1,10 @@
 'use client';
 
-export default function DashboardPage() {
-  return <h1>Welcome to Dashboard</h1>;
+export default function DashboardHome() {
+  return (
+    <div>
+      <h2>Welcome to Dashboard</h2>
+      <p>Select Resources from the sidebar to view all resources.</p>
+    </div>
+  );
 }

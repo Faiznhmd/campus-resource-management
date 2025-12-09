@@ -30,7 +30,13 @@ export default function RegisterPage() {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 50 }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        paddingTop: 50,
+      }}
+    >
       <Card title="Register" style={{ width: 450 }}>
         <Form<RegisterFormValues>
           layout="vertical"
