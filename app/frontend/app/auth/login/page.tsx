@@ -1,3 +1,4 @@
+// frontend/app/auth/login/page.tsx
 'use client';
 
 import { Form, Input, Button, Card, message } from 'antd';
@@ -16,19 +17,17 @@ export default function LoginPage() {
     try {
       const res = await loginUser(values);
 
-      // Save JWT in localStorage (or cookie)
-      document.cookie = `token=${res.token}; path=/;`;
+      console.log('LOGIN RESPONSE:', res);
+
+      // SAVE TOKEN CORRECTLY
+      document.cookie = `token=${res.access_token}; path=/; SameSite=Lax;`;
+      localStorage.setItem('token', res.access_token);
 
       message.success('Login successful!');
       router.push('/dashboard');
-    } catch (error: unknown) {
-      // SAFEST error handling (no any, no AxiosError needed)
-      if (typeof error === 'object' && error !== null && 'response' in error) {
-        const err = error as { response?: { data?: { message?: string } } };
-        message.error(err.response?.data?.message || 'Invalid Credentials');
-      } else {
-        message.error('Invalid Credentials');
-      }
+    } catch (error) {
+      console.error('LOGIN ERROR:', error);
+      message.error('Invalid Credentials');
     }
   };
 

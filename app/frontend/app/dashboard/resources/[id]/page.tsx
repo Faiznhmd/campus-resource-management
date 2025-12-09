@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Card, Button, Tag, message, DatePicker } from 'antd';
+import { Card, Button, Tag, message, TimePicker } from 'antd';
 import axios from '../../../services/api';
-import { Dayjs } from 'dayjs';
 
 interface Resource {
   id: string;
@@ -12,6 +11,15 @@ interface Resource {
   description: string;
   quantity: number;
   status: string;
+  requiresApproval: boolean;
+}
+
+// NORMALIZE TIME → convert "10:00 am" → "10am"
+function normalizeTime(str: string) {
+  return str
+    .replace(/:\d+/g, '') // remove :00
+    .replace(/\s+/g, '') // remove spaces
+    .toLowerCase(); // convert "AM" → "am"
 }
 
 const ResourceDetailsPage = () => {
@@ -23,6 +31,7 @@ const ResourceDetailsPage = () => {
   const [fromDate, setFromDate] = useState<string | null>(null);
   const [toDate, setToDate] = useState<string | null>(null);
 
+  // FETCH RESOURCE DETAILS
   const fetchResource = useCallback(async () => {
     try {
       setLoading(true);
@@ -40,29 +49,24 @@ const ResourceDetailsPage = () => {
     fetchResource();
   }, [fetchResource]);
 
+  // HANDLE BOOKING
   const handleBooking = async () => {
     if (!fromDate || !toDate) {
-      return message.warning('Please select booking dates');
+      return message.warning('Please select booking times');
     }
 
     try {
       await axios.post('/bookings', {
         resourceId: id,
-        fromDate,
-        toDate,
+        startTime: fromDate,
+        endTime: toDate,
       });
 
       message.success('Booking successful!');
       router.push('/dashboard/bookings');
-    } catch (err: unknown) {
+    } catch (err) {
       console.error(err);
-
-      if (typeof err === 'object' && err !== null && 'response' in err) {
-        const errorObj = err as { response?: { data?: { message?: string } } };
-        message.error(errorObj.response?.data?.message || 'Booking failed');
-      } else {
-        message.error('Booking failed');
-      }
+      message.error('Booking failed. Please try again.');
     }
   };
 
@@ -107,24 +111,54 @@ const ResourceDetailsPage = () => {
         </Tag>
       </p>
 
-      <div style={{ marginTop: 20 }}>
-        <h3>Select Booking Dates</h3>
+      {/* ⭐ BOOKING TIME PICKER SECTION */}
+      <div style={{ marginTop: 25 }}>
+        <h3 style={{ marginBottom: 10 }}>Select Booking Times</h3>
 
-        <DatePicker.RangePicker
-          style={{ width: '100%', marginBottom: 20 }}
-          onChange={(dates: [Dayjs | null, Dayjs | null] | null) => {
-            const [start, end] = dates ?? [null, null];
-
-            setFromDate(start ? start.format('YYYY-MM-DD') : null);
-            setToDate(end ? end.format('YYYY-MM-DD') : null);
+        {/* Styled Wrapper for TimePicker */}
+        <div
+          style={{
+            width: '100%',
+            border: '1px solid #d9d9d9',
+            borderRadius: 8,
+            padding: '8px 12px',
+            background: '#fff',
+            marginBottom: 20,
           }}
-        />
+        >
+          <TimePicker.RangePicker
+            format="h:mm a"
+            minuteStep={15}
+            style={{
+              width: '100%',
+              border: 'none',
+            }}
+            popupStyle={{
+              borderRadius: 10,
+              padding: 5,
+            }}
+            onChange={(times) => {
+              const [start, end] = times ?? [null, null];
+
+              const startRaw = start ? start.format('h:mm a') : null;
+              const endRaw = end ? end.format('h:mm a') : null;
+
+              setFromDate(startRaw ? normalizeTime(startRaw) : null);
+              setToDate(endRaw ? normalizeTime(endRaw) : null);
+            }}
+          />
+        </div>
 
         <Button
           type="primary"
           disabled={!isAvailable}
           onClick={handleBooking}
           block
+          style={{
+            height: 45,
+            fontSize: 16,
+            borderRadius: 8,
+          }}
         >
           {isAvailable ? 'Book Resource' : 'Already Booked'}
         </Button>

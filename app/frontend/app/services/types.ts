@@ -11,6 +11,15 @@ export interface LoginPayload {
 }
 
 export interface AuthResponse {
-  token: string;
-  message?: string;
+  message: string;
+  access_token: string; // ✔ CORRECT NAME
+  user: User;
+}
+export interface User {
+  id: number; // Prisma integer ID
+  name: string;
+  email: string;
+  role: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
