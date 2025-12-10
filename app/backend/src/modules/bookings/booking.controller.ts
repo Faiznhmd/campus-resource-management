@@ -7,6 +7,7 @@ import {
   Param,
   Req,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
@@ -17,60 +18,63 @@ import { AdminGuard } from '../auth/role.guard';
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
-  // USER: Create Booking
+  // USER: CREATE BOOKING
   @UseGuards(JwtAuthGuard)
   @Post()
   createBooking(@Body() dto: CreateBookingDto, @Req() req: any) {
-    const userId = req.user.id; // ✅ FIXED
+    const userId = req.user.id;
     return this.bookingService.createBooking(userId, dto);
   }
 
-  // USER: My Bookings
+  // USER: MY BOOKINGS
   @UseGuards(JwtAuthGuard)
   @Get('me')
   getMyBookings(@Req() req: any) {
-    const userId = req.user.id; // ✅ FIXED
-    return this.bookingService.getMyBookings(userId);
+    return this.bookingService.getMyBookings(req.user.id);
   }
 
-  // ADMIN: Pending bookings
+  // RESOURCE BOOKINGS (must be before ':id')
+  @UseGuards(JwtAuthGuard)
+  @Get('resource/:resourceId')
+  getBookingsByResource(@Param('resourceId') resourceId: string) {
+    const id = Number(resourceId);
+    if (isNaN(id)) throw new BadRequestException('Invalid resourceId');
+
+    return this.bookingService.getBookingsByResource(id);
+  }
+
+  // ADMIN: PENDING BOOKINGS
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Get('pending')
   getPending() {
     return this.bookingService.getPendingBookings();
   }
 
-  // ADMIN: Approve
+  // ADMIN: APPROVE
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Patch(':id/approve')
   approve(@Param('id') id: string) {
     return this.bookingService.approveBooking(Number(id));
   }
 
-  // ADMIN: Reject
+  // ADMIN: REJECT
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Patch(':id/reject')
   reject(@Param('id') id: string) {
     return this.bookingService.rejectBooking(Number(id));
   }
 
-  // ADMIN: All bookings
+  // ADMIN: GET ALL
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Get()
   getAllBookings() {
     return this.bookingService.getAllBookings();
   }
 
+  // ADMIN: GET BY ID
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Get(':id')
   getBookingById(@Param('id') id: string) {
     return this.bookingService.getBookingById(Number(id));
-  }
-
-  // ADMIN: Get bookings for a specific user
-  @UseGuards(JwtAuthGuard, AdminGuard)
-  @Get('user/:userId')
-  getBookingsByUser(@Param('userId') userId: string) {
-    return this.bookingService.getBookingsByUser(Number(userId));
   }
 }

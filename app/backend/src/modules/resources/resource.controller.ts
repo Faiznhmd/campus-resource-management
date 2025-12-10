@@ -16,10 +16,14 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../auth/role.guard';
 import { CreateResourceDto } from 'src/user/dto/create-resource.dto';
 import { UpdateResourceDto } from 'src/user/dto/update-resource.dto';
+import { BookingService } from '../bookings/booking.service';
 
 @Controller('resources')
 export class ResourceController {
-  constructor(private readonly resourceService: ResourceService) {}
+  constructor(
+    private readonly resourceService: ResourceService,
+    private readonly bookingService: BookingService, // ✅ FIXED — Inject BookingService
+  ) {}
 
   // ---------------------- ADMIN ONLY ----------------------
 
@@ -47,10 +51,10 @@ export class ResourceController {
   // ---------------------- PUBLIC --------------------------
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
+  async findAll() {
+    await this.bookingService.releasePastBookings(); // 🟢 THIS WILL WORK NOW
     return this.resourceService.findAll();
   }
-
   // ---------------------- ADMIN ONLY VIEW ------------------
   // NOTE: must be placed BEFORE the ':id' route so "admin" is not treated as an id
   @Get('admin')
@@ -61,7 +65,8 @@ export class ResourceController {
 
   // ---------------------- PUBLIC (single) -----------------
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    await this.bookingService.releasePastBookings();
     return this.resourceService.findOne(id);
   }
 }

@@ -7,43 +7,37 @@ import { UpdateResourceDto } from 'src/user/dto/update-resource.dto';
 export class ResourceService {
   constructor(private prisma: PrismaService) {}
 
-  // 🔥 ADMIN - Create Resource
+  // ADMIN - Create
   create(dto: CreateResourceDto) {
-    return this.prisma.resource.create({
-      data: dto,
-    });
+    return this.prisma.resource.create({ data: dto });
   }
 
-  // 🟢 Public: Get all resources
+  // PUBLIC - Get all resources (return ALL bookings)
   findAll() {
     return this.prisma.resource.findMany({
       include: {
-        bookings: true,
+        bookings: true, // return ALL bookings, do NOT filter
       },
     });
   }
 
-  // 🟢 Public: Get one resource
+  // PUBLIC - Get one resource (return ALL bookings)
   async findOne(id: number) {
     const resource = await this.prisma.resource.findUnique({
       where: { id },
       include: {
-        bookings: true,
+        bookings: true, // return ALL bookings, do NOT filter
       },
     });
 
     if (!resource) throw new NotFoundException('Resource not found');
-
     return resource;
   }
 
-  // 🔥 ADMIN - Update Resource
+  // ADMIN - Update
   async update(id: number, dto: UpdateResourceDto) {
-    const resource = await this.prisma.resource.findUnique({
-      where: { id },
-    });
-
-    if (!resource) throw new NotFoundException('Resource not found');
+    const exists = await this.prisma.resource.findUnique({ where: { id } });
+    if (!exists) throw new NotFoundException('Resource not found');
 
     return this.prisma.resource.update({
       where: { id },
@@ -51,29 +45,20 @@ export class ResourceService {
     });
   }
 
-  // 🔥 ADMIN - Delete Resource
+  // ADMIN - Delete
   async delete(id: number) {
-    const resource = await this.prisma.resource.findUnique({
-      where: { id },
-    });
+    const exists = await this.prisma.resource.findUnique({ where: { id } });
+    if (!exists) throw new NotFoundException('Resource not found');
 
-    if (!resource) throw new NotFoundException('Resource not found');
-
-    await this.prisma.resource.delete({
-      where: { id },
-    });
-
+    await this.prisma.resource.delete({ where: { id } });
     return { message: 'Resource deleted successfully' };
   }
 
-  async getAllResources() {
+  // ADMIN - Get all resources with bookings
+  getAllResources() {
     return this.prisma.resource.findMany({
-      include: {
-        bookings: true, // optional: show bookings for each resource
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      include: { bookings: true },
+      orderBy: { createdAt: 'desc' },
     });
   }
 }

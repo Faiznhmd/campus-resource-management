@@ -44,6 +44,7 @@ enum ResourceStatus {
   AVAILABLE
   BOOKED
   MAINTENANCE
+  COMPLETED 
 }
 
 
@@ -68,4 +69,6 @@ enum BookingStatus {
   APPROVED
   REJECTED
   CANCELLED
+  COMPLETED       // <-- ADD THIS
 }
+
