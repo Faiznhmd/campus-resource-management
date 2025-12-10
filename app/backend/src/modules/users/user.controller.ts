@@ -50,4 +50,17 @@ export class UsersController {
   getAllUsers() {
     return this.usersService.getAllUsers();
   }
+
+  // ⭐ Admin toggles user active status (enable/disable)
+  @Patch(':id/toggle-status')
+  @UseGuards(AdminGuard)
+  toggleStatus(@Param('id') id: string) {
+    return this.usersService.toggleUserStatus(Number(id));
+  }
+
+  // ⭐ Admin gets specific user with details (optional - reuses existing method)
+  @Get(':id')
+  getUserById(@Param('id') id: string) {
+    return this.usersService.getUserById(Number(id)); // ✅ FIXED
+  }
 }

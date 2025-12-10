@@ -66,4 +66,11 @@ export class BookingController {
   getBookingById(@Param('id') id: string) {
     return this.bookingService.getBookingById(Number(id));
   }
+
+  // ADMIN: Get bookings for a specific user
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Get('user/:userId')
+  getBookingsByUser(@Param('userId') userId: string) {
+    return this.bookingService.getBookingsByUser(Number(userId));
+  }
 }

@@ -3,8 +3,16 @@
 // import { Layout, Menu } from 'antd';
 // import Link from 'next/link';
 // import { usePathname } from 'next/navigation';
+// import { useEffect, useState } from 'react';
+// import api from '@/app/services/api';
 
 // const { Sider, Content, Header } = Layout;
+
+// interface UserMeResponse {
+//   id: number;
+//   email: string;
+//   role: string;
+// }
 
 // export default function DashboardLayout({
 //   children,
@@ -12,20 +20,73 @@
 //   children: React.ReactNode;
 // }) {
 //   const pathname = usePathname();
+//   const [role, setRole] = useState<string | null>(null);
 
-//   const items = [
+//   // Fetch logged-in user data
+//   useEffect(() => {
+//     const fetchUser = async () => {
+//       try {
+//         const res = await api.get<UserMeResponse>('/auth/me'); // make sure you have this endpoint
+//         setRole(res.data.role);
+//       } catch (err) {
+//         console.log('Failed to fetch user');
+//       }
+//     };
+
+//     fetchUser();
+//   }, []);
+
+//   // Menu items for ADMIN
+//   const adminItems = [
 //     { label: <Link href="/dashboard">Dashboard</Link>, key: '/dashboard' },
+
 //     {
-//       label: <Link href="/dashboard/resources">Resources</Link>,
-//       key: '/dashboard/resources',
+//       label: 'Resources',
+//       key: 'resources',
+//       children: [
+//         {
+//           label: <Link href="/dashboard/admin/resources">All Resources</Link>,
+//           key: '/dashboard/admin/resources',
+//         },
+//         {
+//           label: (
+//             <Link href="/dashboard/admin/resources/create">
+//               Create Resource
+//             </Link>
+//           ),
+//           key: '/dashboard/admin/resources/create',
+//         },
+//       ],
 //     },
+
 //     {
-//       label: <Link href="/dashboard/bookings">Bookings</Link>,
+//       label: <Link href="/dashboard/admin/bookings">Bookings</Link>,
+//       key: '/dashboard/admin/bookings',
+//     },
+
+//     {
+//       label: <Link href="/dashboard/admin/users">Users</Link>,
+//       key: '/dashboard/admin/users',
+//     },
+//   ];
+
+//   // Menu items for NORMAL USER
+//   const userItems = [
+//     { label: <Link href="/dashboard">Dashboard</Link>, key: '/dashboard' },
+
+//     {
+//       label: <Link href="/dashboard/resources">Browse Resources</Link>,
+//       key: '/resources',
+//     },
+
+//     {
+//       label: <Link href="/dashboard/bookings">My Bookings</Link>,
 //       key: '/dashboard/bookings',
 //     },
+
 //     {
-//       label: <Link href="/dashboard/users">Users</Link>,
-//       key: '/dashboard/users',
+//       label: <Link href="/dashboard/profile">Profile</Link>,
+//       key: '/dashboard/profile',
 //     },
 //   ];
 
@@ -36,7 +97,7 @@
 //           theme="dark"
 //           mode="inline"
 //           selectedKeys={[pathname]}
-//           items={items}
+//           items={role === 'ADMIN' ? adminItems : userItems}
 //         />
 //       </Sider>
 
@@ -81,7 +142,7 @@ export default function DashboardLayout({
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await api.get<UserMeResponse>('/auth/me'); // make sure you have this endpoint
+        const res = await api.get<UserMeResponse>('/auth/me');
         setRole(res.data.role);
       } catch (err) {
         console.log('Failed to fetch user');
@@ -90,6 +151,15 @@ export default function DashboardLayout({
 
     fetchUser();
   }, []);
+
+  /**
+   * ⭐ FIX: Ensure correct menu selection for nested routes such as:
+   * /dashboard/admin/users/12/edit
+   * /dashboard/admin/users/12/bookings
+   *
+   * We extract only: /dashboard/admin/users
+   */
+  const basePath = '/' + pathname.split('/').slice(1, 4).join('/');
 
   // Menu items for ADMIN
   const adminItems = [
@@ -131,7 +201,7 @@ export default function DashboardLayout({
 
     {
       label: <Link href="/dashboard/resources">Browse Resources</Link>,
-      key: '/resources',
+      key: '/dashboard/resources',
     },
 
     {
@@ -151,7 +221,8 @@ export default function DashboardLayout({
         <Menu
           theme="dark"
           mode="inline"
-          selectedKeys={[pathname]}
+          // ⭐ FIXED SELECTION FOR NESTED ROUTES
+          selectedKeys={[basePath]}
           items={role === 'ADMIN' ? adminItems : userItems}
         />
       </Sider>
