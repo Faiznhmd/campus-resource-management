@@ -145,7 +145,7 @@ export default function UserBookingsPage() {
               <Button
                 type="primary"
                 onClick={() => router.push('/dashboard/resources')}
-                className="!rounded-lg !px-4 !py-1"
+                className="rounded-lg px-4 py-1"
                 size={isMobile ? 'small' : 'middle'}
               >
                 All Resources
@@ -226,7 +226,7 @@ export default function UserBookingsPage() {
                           </div>
                         </div>
 
-                        <div className="flex-shrink-0 self-center">
+                        <div className="shrink-0 self-center">
                           <Button
                             type="link"
                             onClick={() =>
