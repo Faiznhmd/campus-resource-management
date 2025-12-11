@@ -29,7 +29,7 @@ export default function Upcoming() {
 
         // Filter future bookings
         const futureBookings = res.data.filter(
-          (b) => new Date(b.startTime).getTime() > now
+          (b) => new Date(b.endTime).getTime() > now
         );
 
         // Sort by earliest first
