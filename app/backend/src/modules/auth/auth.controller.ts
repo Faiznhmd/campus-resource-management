@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, UseGuards, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  UseGuards,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { RegisterDto } from '../../user/dto/register.dto';
 import { LoginDto } from '../../user/dto/login.dto';
@@ -35,5 +43,13 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   getMe(@Req() req: Request) {
     return req.user;
+  }
+
+  // auth.controller.ts
+
+  @Post('logout')
+  logout(@Res({ passthrough: true }) res) {
+    res.clearCookie('token'); // NOW WORKS (any adapter)
+    return { message: 'Logged out' };
   }
 }

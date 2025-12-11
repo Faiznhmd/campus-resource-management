@@ -8,32 +8,84 @@ const { Title, Paragraph } = Typography;
 
 export default function Hero() {
   return (
-    <Card
-      style={{
-        marginBottom: 24,
-        padding: '40px 30px',
-        borderRadius: 12,
-        boxShadow: '0 4px 18px rgba(0,0,0,0.06)',
-      }}
-    >
-      <Title level={2} style={{ marginBottom: 10 }}>
-        Welcome to Campus Resource Management
-      </Title>
+    <>
+      <Card className="hero-card">
+        <Title level={2} className="hero-title">
+          Welcome to Campus Resource Management
+        </Title>
 
-      <Paragraph style={{ fontSize: 16, color: '#555', marginBottom: 20 }}>
-        Browse resources, check availability, and manage your bookings easily.
-      </Paragraph>
+        <Paragraph className="hero-text">
+          Browse resources, check availability, and manage your bookings easily.
+        </Paragraph>
 
-      <Link href="/dashboard/resources">
-        <Button
-          type="primary"
-          size="large"
-          icon={<SearchOutlined />}
-          style={{ borderRadius: 8 }}
-        >
-          Browse Resources
-        </Button>
-      </Link>
-    </Card>
+        <Link href="/dashboard/resources" style={{ width: '100%' }}>
+          <Button
+            type="primary"
+            size="large"
+            icon={<SearchOutlined />}
+            className="hero-btn"
+          >
+            Browse Resources
+          </Button>
+        </Link>
+      </Card>
+
+      {/* RESPONSIVE CSS */}
+      <style jsx global>{`
+        .hero-card {
+          margin-bottom: 24px;
+          padding: 40px 30px;
+          border-radius: 12px;
+          box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        .hero-title {
+          margin-bottom: 10px;
+        }
+
+        .hero-text {
+          font-size: 16px;
+          color: #555;
+          margin-bottom: 20px;
+        }
+
+        .hero-btn {
+          border-radius: 8px;
+        }
+
+        /* ------------------------------ */
+        /* RESPONSIVE STYLES (MOBILE)     */
+        /* ------------------------------ */
+
+        @media (max-width: 768px) {
+          .hero-card {
+            padding: 28px 18px;
+          }
+
+          .hero-title {
+            font-size: 22px !important;
+            text-align: center;
+          }
+
+          .hero-text {
+            font-size: 14px;
+            text-align: center;
+          }
+
+          .hero-btn {
+            width: 100%;
+            height: 48px;
+            font-size: 15px;
+          }
+        }
+
+        /* Tablet */
+        @media (max-width: 992px) {
+          .hero-card {
+            padding: 32px 24px;
+          }
+        }
+      `}</style>
+    </>
   );
 }

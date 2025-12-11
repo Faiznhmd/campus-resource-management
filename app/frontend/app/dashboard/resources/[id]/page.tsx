@@ -208,100 +208,121 @@ export default function ResourceDetailsPage() {
   if (!resource) return <p style={{ padding: 20 }}>Loading...</p>;
 
   return (
-    <Card
-      loading={loading}
-      style={{
-        margin: 20,
-        maxWidth: 780,
-        paddingBottom: 20,
-        borderRadius: 12,
-        boxShadow: '0 3px 12px rgba(0,0,0,0.08)',
-      }}
-      title={
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 20, fontWeight: 600 }}>
-            Resource Details
-          </span>
-          <Button onClick={() => router.push('/dashboard/resources')}>
-            ← Back
-          </Button>
-        </div>
-      }
-    >
-      <h2>{resource.name}</h2>
-      {resource.description && <p>{resource.description}</p>}
-
-      <p>
-        <strong>Status:</strong>{' '}
-        <Tag color={isResourceAvailable ? 'green' : 'red'}>
-          {isResourceAvailable ? 'AVAILABLE' : 'NOT AVAILABLE'}
-        </Tag>
-      </p>
-
-      {activeBooking && (
-        <Alert
-          type="warning"
-          message={`Currently in use — available again at ${availableAgainAt}`}
-          style={{ marginBottom: 15 }}
-          showIcon
-        />
-      )}
-
-      <Alert
-        type="info"
-        message={
-          <div>
-            <b>Already Booked Today</b>
-            <ul style={{ marginTop: 8 }}>
-              {bookedSlots.length === 0 && <li>No bookings today</li>}
-              {bookedSlots.map((slot) => (
-                <li key={slot.id} style={{ marginBottom: 6 }}>
-                  {new Date(slot.startTime).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                  {' - '}
-                  {new Date(slot.endTime).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}{' '}
-                  <Tag color={slot.status === 'COMPLETED' ? 'blue' : 'orange'}>
-                    {slot.status}
-                  </Tag>
-                </li>
-              ))}
-            </ul>
+    <div className="details-wrapper">
+      <Card
+        loading={loading}
+        style={{
+          maxWidth: 780,
+          width: '100%',
+          paddingBottom: 20,
+          borderRadius: 12,
+          boxShadow: '0 3px 12px rgba(0,0,0,0.08)',
+        }}
+        title={
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 20, fontWeight: 600 }}>
+              Resource Details
+            </span>
+            <Button onClick={() => router.push('/dashboard/resources')}>
+              ← Back
+            </Button>
           </div>
         }
-        style={{ marginBottom: 20 }}
-      />
-
-      <h3>Select Booking Time</h3>
-
-      <TimePicker.RangePicker
-        format="h:mm a"
-        minuteStep={15}
-        style={{ width: '100%' }}
-        onChange={(values) => {
-          const [s, e] = values ?? [];
-          setStartTime(s ? s.format('h:mm a') : null);
-          setEndTime(e ? e.format('h:mm a') : null);
-        }}
-      />
-
-      <Button
-        type="primary"
-        block
-        disabled={!isResourceAvailable}
-        onClick={handleBooking}
-        style={{ marginTop: 20 }}
       >
-        {isResourceAvailable
-          ? resource.requiresApproval
-            ? 'Request Booking'
-            : 'Book Now'
-          : 'Not Available'}
-      </Button>
-    </Card>
+        {/* --- YOUR PAGE CONTENT --- */}
+        <h2>{resource.name}</h2>
+        {resource.description && <p>{resource.description}</p>}
+
+        <p>
+          <strong>Status:</strong>{' '}
+          <Tag color={isResourceAvailable ? 'green' : 'red'}>
+            {isResourceAvailable ? 'AVAILABLE' : 'NOT AVAILABLE'}
+          </Tag>
+        </p>
+
+        {activeBooking && (
+          <Alert
+            type="warning"
+            message={`Currently in use — available again at ${availableAgainAt}`}
+            style={{ marginBottom: 15 }}
+            showIcon
+          />
+        )}
+
+        <Alert
+          type="info"
+          message={
+            <div>
+              <b>Already Booked Today</b>
+              <ul style={{ marginTop: 8 }}>
+                {bookedSlots.length === 0 && <li>No bookings today</li>}
+                {bookedSlots.map((slot) => (
+                  <li key={slot.id} style={{ marginBottom: 6 }}>
+                    {new Date(slot.startTime).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                    {' - '}
+                    {new Date(slot.endTime).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}{' '}
+                    <Tag
+                      color={slot.status === 'COMPLETED' ? 'blue' : 'orange'}
+                    >
+                      {slot.status}
+                    </Tag>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          }
+          style={{ marginBottom: 20 }}
+        />
+
+        <h3>Select Booking Time</h3>
+
+        <TimePicker.RangePicker
+          format="h:mm a"
+          minuteStep={15}
+          style={{ width: '100%' }}
+          onChange={(values) => {
+            const [s, e] = values ?? [];
+            setStartTime(s ? s.format('h:mm a') : null);
+            setEndTime(e ? e.format('h:mm a') : null);
+          }}
+        />
+
+        <Button
+          type="primary"
+          block
+          disabled={!isResourceAvailable}
+          onClick={handleBooking}
+          style={{ marginTop: 20 }}
+        >
+          {isResourceAvailable
+            ? resource.requiresApproval
+              ? 'Request Booking'
+              : 'Book Now'
+            : 'Not Available'}
+        </Button>
+      </Card>
+
+      {/* Centering Styles */}
+      <style jsx global>{`
+        .details-wrapper {
+          display: flex;
+          justify-content: center;
+          padding: 20px;
+          width: 100%;
+        }
+
+        @media (max-width: 768px) {
+          .details-wrapper {
+            padding: 10px;
+          }
+        }
+      `}</style>
+    </div>
   );
 }

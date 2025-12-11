@@ -6,9 +6,7 @@ import api from '@/app/services/api';
 
 interface Booking {
   id: number;
-  resource: {
-    name: string;
-  };
+  resource: { name: string };
   startTime: string;
   endTime: string;
   status: string;
@@ -17,19 +15,28 @@ interface Booking {
 export default function RecentBookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // detect mobile screen
+    const checkScreen = () => setIsMobile(window.innerWidth < 768);
+    checkScreen();
+    window.addEventListener('resize', checkScreen);
+
+    return () => window.removeEventListener('resize', checkScreen);
+  }, []);
 
   useEffect(() => {
     const fetchBookings = async () => {
       try {
         const res = await api.get<Booking[]>('/bookings/me');
 
-        // Sort by latest booking first
         const sorted = res.data
           .sort(
             (a, b) =>
               new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
           )
-          .slice(0, 5); // show only last 5
+          .slice(0, 5);
 
         setBookings(sorted);
       } catch (err) {
@@ -43,11 +50,7 @@ export default function RecentBookings() {
   }, []);
 
   const columns = [
-    {
-      title: 'Resource',
-      dataIndex: ['resource', 'name'],
-      key: 'resource',
-    },
+    { title: 'Resource', dataIndex: ['resource', 'name'], key: 'resource' },
     {
       title: 'Date',
       key: 'date',
@@ -80,8 +83,11 @@ export default function RecentBookings() {
             : status === 'PENDING'
             ? 'orange'
             : 'red';
-
-        return <Tag color={color}>{status}</Tag>;
+        return (
+          <Tag color={color} style={{ fontWeight: 600 }}>
+            {status}
+          </Tag>
+        );
       },
     },
   ];
@@ -94,14 +100,83 @@ export default function RecentBookings() {
         borderRadius: 12,
         boxShadow: '0 3px 16px rgba(0,0,0,0.07)',
       }}
+      loading={loading}
     >
-      <Table
-        columns={columns}
-        dataSource={bookings}
-        loading={loading}
-        rowKey="id"
-        pagination={false}
-      />
+      {/* DESKTOP TABLE */}
+      {!isMobile && (
+        <Table
+          columns={columns}
+          dataSource={bookings}
+          pagination={false}
+          rowKey="id"
+        />
+      )}
+
+      {/* MOBILE CARD VIEW */}
+      {isMobile && (
+        <div className="mobile-bookings">
+          {bookings.map((b) => (
+            <div key={b.id} className="mobile-card">
+              <p className="m-title">{b.resource.name}</p>
+              <p className="m-text">
+                <strong>Date:</strong>{' '}
+                {new Date(b.startTime).toLocaleDateString()}
+              </p>
+              <p className="m-text">
+                <strong>Time:</strong>{' '}
+                {new Date(b.startTime).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}{' '}
+                -{' '}
+                {new Date(b.endTime).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </p>
+              <Tag
+                color={
+                  b.status === 'APPROVED'
+                    ? 'green'
+                    : b.status === 'PENDING'
+                    ? 'orange'
+                    : 'red'
+                }
+                style={{ marginTop: 8 }}
+              >
+                {b.status}
+              </Tag>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <style jsx>{`
+        .mobile-bookings {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .mobile-card {
+          padding: 16px;
+          border-radius: 10px;
+          background: #fafafa;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .m-title {
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 6px;
+        }
+
+        .m-text {
+          margin: 2px 0;
+          font-size: 14px;
+          color: #444;
+        }
+      `}</style>
     </Card>
   );
 }
